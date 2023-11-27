@@ -1,41 +1,45 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "holberton.h"
+#include "main.h"
 
 /**
- * read_textfile - that reads a text file and prints
- * @filename: variable pointer
- * @letters: size letters
- * Description: Write a function that reads a text file and prints it
- * to the POSIX standard output.
- * Return: the actual number of letters it could read and print, 0 otherwise
+ * read_textfile - reads a text file and prints it to the POSIX standard output
+ *
+ * @filename: name of the file to be read
+ * @letters: number of letters to read and print
+ *
+ * Return: the number of letters printed, or 0 if it failed
  */
 
 ssize_t read_textfile(const char *filename, size_t letters)
 {
-	ssize_t file, let, w;
-	char *text;
+	char *buffer;
+	int rc, wc; /* read & write character counter */
+	int fp;  /* File descriptor */
 
-	text = malloc(letters);
-	if (text == NULL)
+	if (!filename)
 		return (0);
 
-	if (filename == NULL)
+	fp = open(filename, O_RDONLY);
+	if (fp < 0)
 		return (0);
 
-	file = open(filename, O_RDONLY);
+	buffer = malloc(letters * sizeof(char));
+	if (buffer == NULL)
+		return (0);
 
-	if (file == -1)
+	rc = read(fp, buffer, letters);
+	if (rc < 0)
 	{
-		free(text);
+		free(buffer);
 		return (0);
 	}
+	buffer[rc] = '\0';
+	close(fp);
 
-	let = read(file, text, letters);
+	wc = write(STDOUT_FILENO, buffer, rc);
+	free(buffer);
 
-	w = write(STDOUT_FILENO, text, let);
+	if (wc < 0)
+		return (0);
 
-	close(file);
-
-	return (w);
+return (wc);
 }
